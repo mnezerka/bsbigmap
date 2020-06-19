@@ -13,3 +13,14 @@ func IntMax(a, b int) int {
     }
     return b
 }
+
+func IntPow2(a int) int {
+    if a < 1 {
+        return 1
+    }
+    result := 2
+    for i := 1; i < a; i++ {
+        result = result * 2
+    }
+    return result
+}

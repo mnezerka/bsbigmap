@@ -27,10 +27,12 @@ type MapParams struct {
     UrlExpandLeft string
     UrlExpandTop string
     UrlExpandBottom string
+
     UrlShiftRight string
     UrlShiftLeft string
     UrlShiftTop string
     UrlShiftBottom string
+
     UrlShrinkRight string
     UrlShrinkLeft string
     UrlShrinkTop string
@@ -40,6 +42,8 @@ type MapParams struct {
     UrlZoomInKeep string
     UrlZoomOutHalf string
     UrlZoomOutKeep string
+
+    UrlGeneratePng string
 
     WidthTiles int
     HeightTiles int
@@ -185,10 +189,19 @@ func (h *HandlerRoot) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
     // normallization of input parameters
     ip.Zoom = IntMax(IntMin(ip.Provider.MaxZoom, ip.Zoom), ip.Provider.MinZoom)
-    zoom2 := ip.Zoom * ip.Zoom
+    zoom2 := IntPow2(ip.Zoom)
+
+    h.log.Debugf("Map params before corrections:")
+    h.log.Debugf("  zoom: %d", ip.Zoom)
+    h.log.Debugf("  zoom2: %d", zoom2)
+    h.log.Debugf("  zoom2 - 1: %d", zoom2 - 1)
+    h.log.Debugf("  xmin ymin: %d %d", ip.XMin, ip.YMin)
+    h.log.Debugf("  xmax ymax: %d %d", ip.XMax, ip.YMax)
 
     ip.XMin = IntMax(0, ip.XMin)
     ip.YMin = IntMax(0, ip.YMin)
+    h.log.Debugf("mintest %d", IntMin(zoom2 - 1, 73));
+    h.log.Debugf("mintest %d", IntMin(zoom2 - 1, 71));
     ip.XMax = IntMin(zoom2 - 1, ip.XMax)
     ip.YMax = IntMin(zoom2 - 1, ip.YMax)
 
@@ -199,6 +212,13 @@ func (h *HandlerRoot) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     mp.HeightTiles = ip.YMax - ip.YMin + 1
     mp.WidthPx = mp.WidthTiles * ip.Provider.Scale
     mp.HeightPx = mp.HeightTiles * ip.Provider.Scale
+
+    h.log.Debugf("Map params after corrections:")
+    h.log.Debugf("  zoom: %d", ip.Zoom)
+    h.log.Debugf("  zoom2: %d", zoom2)
+    h.log.Debugf("  zoom2 - 1: %d", zoom2 - 1)
+    h.log.Debugf("  xmin ymin: %d %d", ip.XMin, ip.YMin)
+    h.log.Debugf("  xmax ymax: %d %d", ip.XMax, ip.YMax)
 
     // expand links
     mp.UrlExpandLeft = getMapUrl(urlBase, ip.Zoom, ip.XMin - 1, ip.YMin, ip.XMax, ip.YMax, ip.Provider.Name, ip.XMin == 0)
@@ -240,6 +260,8 @@ func (h *HandlerRoot) ServeHTTP(w http.ResponseWriter, r *http.Request) {
         ip.YMax / 2 + (ip.YMax - ip.YMin) / 4,
         ip.Provider.Name,
         ip.Zoom <= ip.Provider.MinZoom)
+
+    mp.UrlGeneratePng = getMapUrl(urlBase, ip.Zoom, ip.XMin, ip.YMin, ip.XMax, ip.YMax, ip.Provider.Name, false)
 
     data := HtmlMap{InputParams: ip, MapParams: mp}
 
