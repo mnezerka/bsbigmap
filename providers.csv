@@ -1,0 +1,5 @@
+#name,minzoom,maxzoom,scale,url,tile attribution
+
+mapycz,2,20,256,https://mapserver.mapy.cz/turist-m/!z-!x-!y,"&copy; <a href=""https://www.seznam.cz/"">Seznam.cz, a.s</a>"
+osm-de,0,18,256,http://{abc}.tile.openstreetmap.de/tiles/osmde/!z/!x/!y.png,"Tiles &copy; <a href=""http://openstreetmap.de/"">OSM DE</a>"
+mapnik,0,19,256,http://tile.openstreetmap.org/!z/!x/!y.png,""

@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>BSBigMap</title>
+</head>
+
+<style>
+body {
+  background-color: linen;
+}
+
+h1 {
+  color: maroon;
+  margin-left: 40px;
+}
+
+#control {
+    text-align:center;
+    position: fixed;
+    top: 50px;
+    margin-left: 50px;
+    margin-right: 50px;
+    padding: 10px;
+    background: #ffffff;
+    opacity: 0.7;
+    border: solid 1px;
+    border-color: green;
+}
+
+.section {
+    background-color: #eee;
+    margin-bottom: 2px;
+}
+
+table.cross {
+    display: inline-block;
+    border-spacing: 0px;
+    border-collapse: separate;
+}
+
+.cross td {
+    text-align: center;
+    padding: 2px;
+}
+
+.cross-center {
+    font-weight: bold;
+}
+
+.disabled {
+    color: #aaa;
+}
+
+</style>
+
+<body>
+    {{range .Images}}
+        <img src="{{.Url}}" style="{{.Style}}"/>
+    {{end}}
+
+    <div id="control">
+
+        <div class="section">
+        Map is {{.MapParams.WidthTiles}}x{{.MapParams.HeightTiles}} tiles ({{.MapParams.WidthPx}}x{{.MapParams.HeightPx}}) at zoom {{.InputParams.Zoom}}
+        </div>
+
+        <table class="cross section">
+            <tr>
+                <td/>
+                <td>{{if .MapParams.UrlExpandTop}}<a href="{{.MapParams.UrlExpandTop}}">Top</a>{{else}}<span class="disabled">Top{{end}}</span></td>
+                <td>
+            </tr>
+            <tr>
+                <td>{{if .MapParams.UrlExpandLeft}}<a href="{{.MapParams.UrlExpandLeft}}">Left</a>{{else}}<span class="disabled">Left</span>{{end}}</td>
+                <td class="cross-center">EXPAND</td>
+                <td>{{if .MapParams.UrlExpandRight}}<a href="{{.MapParams.UrlExpandRight}}">Right</a>{{else}}<span class="disabled">Right</span>{{end}}</td>
+            </tr>
+            <tr>
+                <td/>
+                <td>{{if .MapParams.UrlExpandBottom}}<a href="{{.MapParams.UrlExpandBottom}}">Bottom</a>{{else}}<span class="disabled">Bottom</span>{{end}}</td>
+                <td>
+            </tr>
+        </table>
+
+        <table class="cross section">
+            <tr>
+                <td/>
+                <td>{{if .MapParams.UrlShiftTop}}<a href="{{.MapParams.UrlShiftTop}}">Top</a>{{else}}<span class="disabled">Up</span>{{end}}</td>
+                <td>
+            </tr>
+            <tr>
+                <td>{{if .MapParams.UrlShiftLeft}}<a href="{{.MapParams.UrlShiftLeft}}">Left</a>{{else}}<span class="disabled">Left</span>{{end}}</td>
+                <td class="cross-center">SHIFT</td>
+                <td>{{if .MapParams.UrlShiftRight}}<a href="{{.MapParams.UrlShiftRight}}">Right</a>{{else}}<span class="disabled">Right</span>{{end}}</td>
+            </tr>
+            <tr>
+                <td/>
+                <td>{{if .MapParams.UrlShiftBottom}}<a href="{{.MapParams.UrlShiftBottom}}">Bottom</a>{{else}}<span class="disabled">Down</span>{{end}}</td>
+                <td>
+            </tr>
+        </table>
+
+        <table class="cross section">
+            <tr>
+                <td/>
+                <td>{{if .MapParams.UrlShrinkTop}}<a href="{{.MapParams.UrlShrinkTop}}">Top</a>{{else}}<span class="disabled">Top</span>{{end}}</td>
+                <td>
+            </tr>
+            <tr>
+                <td>{{if .MapParams.UrlShrinkLeft}}<a href="{{.MapParams.UrlShrinkLeft}}">Left</a>{{else}}<span class="disabled">Left</span>{{end}}</td>
+                <td class="cross-center">SHRINK</td>
+                <td>{{if .MapParams.UrlShrinkRight}}<a href="{{.MapParams.UrlShrinkRight}}">Right</a>{{else}}<span class="disabled">Right</span>{{end}}</td>
+            </tr>
+            <tr>
+                <td/>
+                <td>{{if .MapParams.UrlShrinkBottom}}<a href="{{.MapParams.UrlShrinkBottom}}">Bottom</a>{{else}}<span class="disabled">Bottom</span>{{end}}</td>
+                <td>
+            </tr>
+        </table>
+
+        <div class="section">
+            {{if .MapParams.UrlZoomInDouble}}<a href="{{.MapParams.UrlZoomInDouble}}">In/Double</a>{{else}}<span class="disabled">In/Double</span>{{end}}</td>
+            {{if .MapParams.UrlZoomInKeep}}<a href="{{.MapParams.UrlZoomInKeep}}">In/Keep</a>{{else}}<span class="disabled">In/Keep</span>{{end}}</td>
+            <span class="cross-center">ZOOM</span>
+            {{if .MapParams.UrlZoomOutHalf}}<a href="{{.MapParams.UrlZoomOutHalf}}">Out/Half</a>{{else}}<span class="disabled">Out/Half</span>{{end}}</td>
+            {{if .MapParams.UrlZoomOutKeep}}<a href="{{.MapParams.UrlZoomOutKeep}}">Out/Keep</a>{{else}}<span class="disabled">Out/Keep</span>{{end}}</td>
+        </div>
+
+    </div>
+
+</body>
+</html>
