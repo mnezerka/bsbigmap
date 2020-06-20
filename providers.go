@@ -3,8 +3,11 @@ package main
 import (
     "encoding/csv"
     "io"
+    "math/rand"
     "os"
+    "regexp"
     "strconv"
+    "strings"
 )
 
 type Provider struct {
@@ -14,6 +17,12 @@ type Provider struct {
     Scale int
     Url string
     Attribution string
+}
+
+type Tile struct {
+    Left int
+    Top int
+    Url string
 }
 
 func readProviders() (map[string]Provider, error) {
@@ -65,4 +74,32 @@ func readProviders() (map[string]Provider, error) {
     }
 
     return providers, nil
+}
+
+func (p *Provider) getTiles(xmin, ymin, xmax, ymax, zoom, scale int) *[]Tile {
+
+    var tiles []Tile
+
+    for y := ymin; y <= ymax; y++ {
+        for x := xmin; x <= xmax; x++ {
+
+            xp := x - xmin
+            yp := y - ymin
+
+            url := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(p.Url, "!z", strconv.Itoa(zoom)), "!y", strconv.Itoa(y)), "!x", strconv.Itoa(x))
+
+            // load balancing
+            // {abc} => a or b or c
+            re := regexp.MustCompile(`{[a-z0-9]+}`)
+            if loc := re.FindStringIndex(url); loc != nil {
+                charPos := rand.Intn(loc[1] - loc[0] - 2)
+                char := url[loc[0] + 1 + charPos]
+                url = strings.ReplaceAll(url, url[loc[0]:loc[1]], string(char))
+            }
+
+            tiles = append(tiles, Tile{xp, yp, url})
+            //data.Images = append(data.Images, HtmlImage{Url: bg, Style: template.CSS(style)})
+        }
+    }
+    return &tiles
 }

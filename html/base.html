@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>BSBigMap - {{ template "title" }}</title>
+</head>
+
+<style>
+body {
+  background-color: linen;
+}
+
+h1 {
+  color: maroon;
+  margin-left: 40px;
+}
+
+#control {
+    text-align:center;
+    position: fixed;
+    top: 50px;
+    margin-left: 50px;
+    margin-right: 50px;
+    padding: 10px;
+    background: #ffffff;
+    opacity: 0.7;
+    border: solid 1px;
+    border-color: green;
+}
+
+.section {
+    background-color: #eee;
+    margin-bottom: 2px;
+}
+
+table.cross {
+    display: inline-block;
+    border-spacing: 0px;
+    border-collapse: separate;
+}
+
+.cross td {
+    text-align: center;
+    padding: 2px;
+}
+
+.cross-center {
+    font-weight: bold;
+}
+
+.disabled {
+    color: #aaa;
+}
+
+</style>
+
+<body>
+    {{ template "content" . }}
+</body>
+</html>
