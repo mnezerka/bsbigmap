@@ -47,12 +47,12 @@ type HtmlMap struct {
     Images []HtmlImage
 }
 
-type HandlerRoot struct {
+type HandlerMap struct {
     log *logging.Logger
     providers map[string]Provider
 }
 
-func (h *HandlerRoot) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *HandlerMap) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     var err error
 
     h.log.Debugf("Processing request, path: %s", r.URL.Path)
