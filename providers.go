@@ -17,6 +17,7 @@ type Provider struct {
     Scale int
     Url string
     Attribution string
+    SubDomains string
 }
 
 type Tile struct {
@@ -70,6 +71,14 @@ func readProviders() (map[string]Provider, error) {
             return nil, err
         }
 
+        // load balancing
+        // [abc] => {s} + remember "abc" for distribution to a or b or c
+        re := regexp.MustCompile(`[[][a-z0-9]+[]]`)
+        if loc := re.FindStringIndex(p.Url); loc != nil {
+            p.SubDomains = p.Url[loc[0] + 1:loc[1] - 1]
+            p.Url = strings.ReplaceAll(p.Url, p.Url[loc[0]:loc[1]], "{s}")
+        }
+
         providers[p.Name] = p
     }
 
@@ -86,19 +95,17 @@ func (p *Provider) getTiles(xmin, ymin, xmax, ymax, zoom, scale int) *[]Tile {
             xp := x - xmin
             yp := y - ymin
 
-            url := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(p.Url, "!z", strconv.Itoa(zoom)), "!y", strconv.Itoa(y)), "!x", strconv.Itoa(x))
+            url := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(p.Url, "{z}", strconv.Itoa(zoom)), "{y}", strconv.Itoa(y)), "{x}", strconv.Itoa(x))
 
             // load balancing
-            // {abc} => a or b or c
-            re := regexp.MustCompile(`{[a-z0-9]+}`)
-            if loc := re.FindStringIndex(url); loc != nil {
-                charPos := rand.Intn(loc[1] - loc[0] - 2)
-                char := url[loc[0] + 1 + charPos]
-                url = strings.ReplaceAll(url, url[loc[0]:loc[1]], string(char))
+            // pick random character from subdomains
+            if p.SubDomains != "" {
+                charPos := rand.Intn(len(p.SubDomains) - 1)
+                char := p.SubDomains[charPos]
+                url = strings.ReplaceAll(url, "{s}", string(char))
             }
 
             tiles = append(tiles, Tile{xp, yp, url})
-            //data.Images = append(data.Images, HtmlImage{Url: bg, Style: template.CSS(style)})
         }
     }
     return &tiles

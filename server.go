@@ -47,7 +47,9 @@ func runServer(c *cli.Context) {
 
     http.Handle("/stitcher", &HandlerParams{logger, providers, &HandlerStitcher{logger, providers}})
 
-    http.Handle("/", &HandlerParams{logger, providers, &HandlerMap{logger, providers}})
+    http.Handle("/map", &HandlerParams{logger, providers, &HandlerMap{logger, providers}})
+
+    http.Handle("/", &HandlerRoot{logger, providers})
 
     logger.Infof("Listening on %s...", c.GlobalString("bind-address"))
     err = http.ListenAndServe(c.GlobalString("bind-address"), nil)

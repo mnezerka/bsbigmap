@@ -64,9 +64,9 @@ func (h *HandlerMap) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     }
 
     // check path, only root is allowed
-    if r.URL.Path != "/" {
+    if r.URL.Path != "/map" {
         h.log.Warningf("Ignoring request to path %s", r.URL.Path)
-        WriteErrorResponse(w, http.StatusNotFound, fmt.Errorf("Only root path is supported"))
+        WriteErrorResponse(w, http.StatusNotFound, fmt.Errorf("Only /map path is supported"))
         return
     }
 
