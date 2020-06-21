@@ -15,6 +15,7 @@ import (
 type HandlerStitcher struct {
     log *logging.Logger
     providers map[string]Provider
+    queue *Queue
 }
 
 func (h *HandlerStitcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -35,10 +36,18 @@ func (h *HandlerStitcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // get request context to access params from upper handler
     ctx := r.Context()
 
     // get input parameters
     ip := ctx.Value("ip").(*InputParams)
+
+    err = h.queue.Enqueue(ip)
+    if err != nil {
+        e := fmt.Errorf("Cannot enqueue: %s", err)
+        h.log.Error(err)
+        WriteErrorResponse(w, 500, e)
+    }
 
     // create final image (canvas)
     h.log.Debugf("Input params: %v", ip);

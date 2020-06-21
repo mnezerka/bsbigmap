@@ -1,5 +1,11 @@
 package main
 
+import (
+    "fmt"
+    "math/rand"
+    "time"
+)
+
 func IntMin(a, b int) int {
     if a < b {
         return a
@@ -23,4 +29,12 @@ func IntPow2(a int) int {
         result = result * 2
     }
     return result
+}
+
+// yyyy-mm-dd-hh-mm-ss-rrrr, where rrrr is random string
+func UniqueId() string {
+    t := time.Now()
+    uuid := fmt.Sprintf("%d-%02d-%02d-%02d-%02d-%02d-%09d-%04d",
+        t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), rand.Intn(9999))
+    return uuid
 }

@@ -4,15 +4,15 @@ import (
     "log"
     "net/http"
     "os"
-    "github.com/urfave/cli"
+    "github.com/urfave/cli/v2"
     "github.com/op/go-logging"
 )
 
 const LOG_FORMAT = "%{color}%{time:2006/01/02 15:04:05 -07:00 MST} [%{level:.6s}] %{shortfile} : %{color:reset}%{message}"
 
-func runServer(c *cli.Context) {
+func runServer(c *cli.Context) error {
 
-    ///////////////// LOGGER instance
+    ///////////////////////////////// LOGGER
     // NewLogger creates instance of logger that should be used
     // in all server handlers and routines. The idea is to have
     // unified style of logging - logger is configured only once
@@ -22,10 +22,11 @@ func runServer(c *cli.Context) {
     backendFormatter := logging.NewBackendFormatter(backend, format)
 
     backendLeveled := logging.AddModuleLevel(backendFormatter)
-    logLevel, err := logging.LogLevel(c.GlobalString("log-level"))
+    logLevel, err := logging.LogLevel(c.String("log-level"))
     if err != nil {
-        log.Fatalf("Cannot create logger for level %s (%v)", c.GlobalString("log-level"), err)
-        os.Exit(1)
+        log.Fatalf("Cannot create logger for level %s (%v)", c.String("log-level"), err)
+        return err
+        //os.Exit(1)
     }
     backendLeveled.SetLevel(logLevel, "")
 
@@ -34,26 +35,36 @@ func runServer(c *cli.Context) {
 
     logger.Infof("Starting BSBigMap server")
 
-    ////////////////////////////////// PROVIDERS
+    ////////////////////////////////// TILE PROVIDERS
 
     logger.Infof("Reading providers")
     providers, err := readProviders()
     if err != nil {
         logger.Errorf("Providers config error: %s", err)
+        return err
     }
     for provider := range providers {
         logger.Infof("- %s %v", provider, providers[provider])
     }
 
-    http.Handle("/stitcher", &HandlerParams{logger, providers, &HandlerStitcher{logger, providers}})
+    ////////////////////////////////// QUEUE
+    queue, err := NewQueue(logger, c.String("queue-dir"))
+    if err != nil {
+        return err
+    }
+
+    ////////////////////////////////// HTTP HANDLERS
+    http.Handle("/stitcher", &HandlerParams{logger, providers, &HandlerStitcher{logger, providers, queue}})
 
     http.Handle("/map", &HandlerParams{logger, providers, &HandlerMap{logger, providers}})
 
     http.Handle("/", &HandlerRoot{logger, providers})
 
-    logger.Infof("Listening on %s...", c.GlobalString("bind-address"))
-    err = http.ListenAndServe(c.GlobalString("bind-address"), nil)
-    FatalOnError(err, "Failed to bind on %s: ", c.GlobalString("bind-address"))
+    ////////////////////////////////// SERVER
+
+    logger.Infof("Listening on %s...", c.String("bind-address"))
+    err = http.ListenAndServe(c.String("bind-address"), nil)
+    return err
 }
 
 func FatalOnError(err error, msg string, args ...interface{}) {
@@ -68,7 +79,7 @@ func main() {
 
     app.Name = "BSBigMap Server"
     app.Version = "1.0"
-    app.Authors = []cli.Author{
+    app.Authors = []*cli.Author{
         {
             Name:  "Michal Nezerka",
             Email: "michal.nezerka@gmail.com",
@@ -77,19 +88,31 @@ func main() {
     app.Usage = "Stitch map tiles into single PNG image"
     app.Action = runServer
     app.Flags = []cli.Flag{
-        cli.StringFlag{
-            Name:   "bind-address,b",
+        &cli.StringFlag{
+            Name:   "bind-address",
+            Aliases: []string{"b"},
             Usage:  "Listen address for API HTTP endpoint",
             Value:  "0.0.0.0:9090",
-            EnvVar: "BIND_ADDRESS",
+            EnvVars: []string{"BIND_ADDRESS"},
         },
-        cli.StringFlag{
-            Name:   "log-level,l",
+        &cli.StringFlag{
+            Name:   "log-level",
+            Aliases: []string{"l"},
             Usage:  "Logging level",
             Value:  "INFO",
-            EnvVar: "LOG_LEVEL",
+            EnvVars: []string{"LOG_LEVEL"},
+        },
+        &cli.PathFlag{
+            Name:   "queue-dir",
+            Aliases: []string{"q"},
+            Usage:  "Directory used for storing queued files",
+            Value:  "./queue",
+            EnvVars: []string{"QUEUE_DIR"},
         },
     }
 
-    app.Run(os.Args)
+    err := app.Run(os.Args)
+    if err != nil {
+        FatalOnError(err, "Failed to start server: %s", err)
+    }
 }
