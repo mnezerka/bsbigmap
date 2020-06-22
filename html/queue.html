@@ -1,0 +1,45 @@
+{{ define "title" }}Queue{{ end }}
+{{ define "head" }} {{ end }}
+{{ define "styles" }}
+
+table.queue {
+    border-collapse: collapse
+    }
+
+.queue th, td {
+    border: 1px solid gray;
+}
+.queue th {
+    text-align: left;
+
+}
+{{ end }}
+{{ define "content" }}
+<h1>Queue</h1>
+
+<table class="queue">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>State</th>
+            <th>Zoom</th>
+            <th>Tiles</th>
+            <th>Pixels</th>
+            <th>Image</th>
+        </tr>
+    </thead>
+    <tbody>
+{{range .}}
+        <tr>
+            <td>{{.QueueRequest.Id}}</td>
+            <td>{{.QueueRequest.State}}</td>
+            <td>{{.QueueRequest.Params.Zoom}}</td>
+            <td>{{.WidthTiles}}x{{.HeightTiles}}</td>
+            <td>{{.WidthPx}}x{{.HeightPx}}</td>
+            <td><a href="{{.Url}}">Image (PNG)</a></td>
+        </tr>
+{{end}}
+    </tbody>
+</table>
+
+{{ end }}

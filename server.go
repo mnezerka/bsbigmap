@@ -4,6 +4,7 @@ import (
     "log"
     "net/http"
     "os"
+    "time"
     "github.com/urfave/cli/v2"
     "github.com/op/go-logging"
 )
@@ -44,11 +45,16 @@ func runServer(c *cli.Context) error {
         return err
     }
     for provider := range providers {
-        logger.Infof("- %s %v", provider, providers[provider])
+        logger.Infof("- %s %s", provider, providers[provider].Name)
     }
 
     ////////////////////////////////// QUEUE
-    queue, err := NewQueue(logger, c.String("queue-dir"))
+    queue, err := NewQueue(
+            logger,
+            c.String("queue-dir"),
+            c.Duration("queue-validity"),
+            c.Duration("queue-monitor-interval"),
+        )
     if err != nil {
         return err
     }
@@ -58,7 +64,17 @@ func runServer(c *cli.Context) error {
 
     http.Handle("/map", &HandlerParams{logger, providers, &HandlerMap{logger, providers}})
 
+    http.Handle("/queue", &HandlerQueue{logger, queue})
+
+    // server static content
+    //fs := http.FileServer(http.Dir("."))
+    //http.Handle("/static/", http.StripPrefix("/static/", fs))
+    fs := http.FileServer(http.Dir(queue.dir))
+    http.Handle("/queue/", http.StripPrefix("/" + queue.dir + "/", fs))
+
+
     http.Handle("/", &HandlerRoot{logger, providers})
+
 
     ////////////////////////////////// SERVER
 
@@ -106,9 +122,22 @@ func main() {
             Name:   "queue-dir",
             Aliases: []string{"q"},
             Usage:  "Directory used for storing queued files",
-            Value:  "./queue",
+            Value:  "queue",
             EnvVars: []string{"QUEUE_DIR"},
         },
+        &cli.DurationFlag{
+            Name: "queue-validity",
+            Usage: "The maximal time for request (generated image) to be kept in queue",
+            Value: time.Hour * 24 * 2,
+            EnvVars: []string{"QUEUE_VALIDITY"},
+        },
+        &cli.DurationFlag{
+            Name: "queue-monitor-interval",
+            Usage: "The interval in which queue checks new requests to be processed",
+            Value: time.Second * 5,
+            EnvVars: []string{"QUEUE_MONITOR_INTERVAL"},
+        },
+
     }
 
     err := app.Run(os.Args)
