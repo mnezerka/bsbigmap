@@ -10,6 +10,7 @@ import (
     "net/http"
     "path"
     "path/filepath"
+    "reflect"
     "time"
     "github.com/op/go-logging"
 )
@@ -252,6 +253,25 @@ func (q Queue) writeRequestJson(request *QueueRequest) error {
 
 func (q *Queue) Enqueue(ip *InputParams) (*QueueRequest, error) {
 
+    // 1. first look if same request already exist
+
+    // get current list of all queued requests
+    requests, err := q.GetRequests()
+    if err != nil {
+        return nil, err
+    }
+
+    for _, r := range requests {
+
+        // if same request alrady exist, return it and don't generate new one
+        if reflect.DeepEqual(r.Params, *ip) {
+            q.log.Debugf("Detected request with same params as existing request: %s", r.Id)
+            return r, nil
+        }
+    }
+
+    // 2. create new request
+
     // generate unique id
     id := UniqueId()
 
@@ -265,5 +285,3 @@ func (q *Queue) Enqueue(ip *InputParams) (*QueueRequest, error) {
     }
     return &request, nil
 }
-
-    

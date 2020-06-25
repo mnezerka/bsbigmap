@@ -67,11 +67,8 @@ func runServer(c *cli.Context) error {
     http.Handle("/queue", &HandlerQueue{logger, queue})
 
     // server static content
-    //fs := http.FileServer(http.Dir("."))
-    //http.Handle("/static/", http.StripPrefix("/static/", fs))
     fs := http.FileServer(http.Dir(queue.dir))
     http.Handle("/queue/", http.StripPrefix("/" + queue.dir + "/", fs))
-
 
     http.Handle("/", &HandlerRoot{logger, providers})
 

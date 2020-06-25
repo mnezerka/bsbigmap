@@ -7,7 +7,8 @@ table.queue {
     }
 
 .queue th, td {
-    border: 1px solid gray;
+    border-bottom: 1px solid #ddd;
+    padding: 3px;
 }
 .queue th {
     text-align: left;
@@ -17,6 +18,12 @@ table.queue {
 {{ define "content" }}
 <h1>Queue</h1>
 
+{{ if not . }}
+
+Request not found or queue is empty
+
+{{ else }}
+
 <table class="queue">
     <thead>
         <tr>
@@ -25,21 +32,27 @@ table.queue {
             <th>Zoom</th>
             <th>Tiles</th>
             <th>Pixels</th>
+            <th>Provider</th>
             <th>Image</th>
         </tr>
     </thead>
     <tbody>
 {{range .}}
         <tr>
-            <td>{{.QueueRequest.Id}}</td>
-            <td>{{.QueueRequest.State}}</td>
-            <td>{{.QueueRequest.Params.Zoom}}</td>
-            <td>{{.WidthTiles}}x{{.HeightTiles}}</td>
-            <td>{{.WidthPx}}x{{.HeightPx}}</td>
-            <td><a href="{{.Url}}">Image (PNG)</a></td>
+            <td>{{ .QueueRequest.Id }}</td>
+            <td>{{ .QueueRequest.State }}</td>
+            <td>{{ .QueueRequest.Params.Zoom }}</td>
+            <td>{{ .WidthTiles }}x{{ .HeightTiles }}</td>
+            <td>{{ .WidthPx }}x{{ .HeightPx }}</td>
+            <td>{{ .QueueRequest.Params.Provider.Name }}</td>
+            <td><a href="{{ .Url }}">Download image (PNG)</a></td>
         </tr>
-{{end}}
+{{ end }}
     </tbody>
 </table>
+
+{{ end }}
+
+<p><a href = "/">Go back to main page</a></p>
 
 {{ end }}

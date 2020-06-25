@@ -3,6 +3,17 @@
 {{ define "styles" }} {{ end }}
 {{ define "content" }}
 
-This is stitcher content
+<h1>Stitcher</h1>
+
+<p>
+Your request was enqueued and will be processed as soon as possible. Request id is <b>{{ .Id }}</b>
+and it's state could be checked on following links:
+</p>
+
+<p><a href = "queue?request={{ .Id }}">Request in queue</a></p>
+
+<p><a href = "queue">All requests in queue</a></p>
+
+<p><a href = "/">Go back to main page</a></p>
 
 {{ end }}

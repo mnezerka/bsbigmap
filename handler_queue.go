@@ -33,11 +33,17 @@ func (h *HandlerQueue) ServeHTTP(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // check http method, GET is required
+    // check path
     if r.URL.Path != "/queue" {
         h.log.Warningf("Ignoring request to path %s", r.URL.Path)
         WriteErrorResponse(w, http.StatusNotFound, fmt.Errorf("Only /queue path is supported"))
         return
+    }
+
+    // get id of the request
+    request := r.URL.Query().Get("request")
+    if len(request) != 0 {
+        h.log.Debugf("Request to be shown: %s", request)
     }
 
     // get current list of all queued requests
@@ -48,6 +54,13 @@ func (h *HandlerQueue) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
     var tplData []tplRequest
     for _, r := range requests {
+
+        // if request id was specify, filter requests
+        if len(request) != 0 {
+            if request != r.Id {
+                continue
+            }
+        }
 
         tr := tplRequest{
             r,
