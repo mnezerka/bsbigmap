@@ -90,7 +90,7 @@ func FatalOnError(err error, msg string, args ...interface{}) {
 func main() {
     app := cli.NewApp()
 
-    app.Name = "BSBigMap Server"
+    app.Name = "GoBigMap Server"
     app.Version = "1.0"
     app.Authors = []*cli.Author{
         {
